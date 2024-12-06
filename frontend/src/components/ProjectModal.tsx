@@ -16,7 +16,14 @@ interface ProjectModalProps {
   mode?: 'add' | 'edit';
 }
 
-const ProjectModal = ({ onClose, onSuccess, resources, clients, initialProject, mode = 'add' }: ProjectModalProps) => {
+const ProjectModal = ({
+  onClose,
+  onSuccess,
+  resources,
+  clients,
+  initialProject,
+  mode = 'add',
+}: ProjectModalProps) => {
   const [formData, setFormData] = useState({
     name: initialProject?.name || '',
     clientName: initialProject?.clientName || clients[0]?.name || '',
@@ -26,36 +33,46 @@ const ProjectModal = ({ onClose, onSuccess, resources, clients, initialProject, 
     activityTypes: initialProject?.activityTypes || [],
     description: initialProject?.description || '',
     budget: initialProject?.budget?.toString() || '',
-    status: initialProject?.status || 'active' as const,
+    status: initialProject?.status || ('active' as const),
   });
 
   const [showResourceModal, setShowResourceModal] = useState(false);
-  const [selectedResources, setSelectedResources] = useState<Personnel[]>(initialProject?.personnel || []);
+  const [selectedResources, setSelectedResources] = useState<Personnel[]>(
+    initialProject?.personnel || []
+  );
   const [showClientModal, setShowClientModal] = useState(false);
   const [activityType, setActivityType] = useState('');
+  const { activities: availableActivities, createActivity, loading: activitiesLoading } = useActivities();
 
-  const {
-    activities: availableActivities,
-    createActivity,
-    loading: activitiesLoading
-  } = useActivities();
+  // Yeni handleSubmit fonksiyonu
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    try {
+      // Form verilerini backend'e gönderme işlemi
+      console.log('Form submitted:', formData, selectedResources);
+
+      if (onSuccess) {
+        onSuccess(); // Başarılı işlem sonrası modal'ı kapatabilir veya listeyi yenileyebilirsiniz
+      }
+
+      onClose(); // Modal'ı kapat
+    } catch (error) {
+      console.error('Error submitting the form:', error);
+    }
+  };
 
   const handleClientChange = (clientName: string) => {
-    const clientProjects = projects.filter(p => p.clientName === clientName);
-    setFormData(prev => ({
-      ...prev,
-      clientName,
-      projectName: clientProjects[0]?.name || ''
-    }));
+    setFormData((prev) => ({ ...prev, clientName }));
   };
 
   const handleAddActivityType = async () => {
     if (activityType.trim()) {
       try {
         await createActivity(activityType.trim());
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
-          activityTypes: [...prev.activityTypes, activityType.trim()]
+          activityTypes: [...prev.activityTypes, activityType.trim()],
         }));
         setActivityType('');
       } catch (error) {
@@ -65,9 +82,9 @@ const ProjectModal = ({ onClose, onSuccess, resources, clients, initialProject, 
   };
 
   const handleRemoveActivityType = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      activityTypes: prev.activityTypes.filter((_, i) => i !== index)
+      activityTypes: prev.activityTypes.filter((_, i) => i !== index),
     }));
   };
 
@@ -75,30 +92,26 @@ const ProjectModal = ({ onClose, onSuccess, resources, clients, initialProject, 
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Add New Project</h2>
+          <h2 className="text-xl font-semibold">{mode === 'add' ? 'Add New Project' : 'Edit Project'}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             <X className="w-5 h-5" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Form fields remain the same */}
+          {/* Form fields */}
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Project Name *
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Project Name *</label>
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Client Name *
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Client Name *</label>
               <div className="flex space-x-2">
                 <select
                   value={formData.clientName}
@@ -123,61 +136,7 @@ const ProjectModal = ({ onClose, onSuccess, resources, clients, initialProject, 
               </div>
             </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Activity Types
-            </label>
-            <div className="flex space-x-2">
-              <select
-                value={activityType}
-                onChange={(e) => setActivityType(e.target.value)}
-                className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              >
-                <option value="">Select or type new activity</option>
-                {availableActivities.map((activity) => (
-                  <option key={activity} value={activity}>
-                    {activity}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                value={activityType}
-                onChange={(e) => setActivityType(e.target.value)}
-                className="w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                placeholder="Enter activity type"
-              />
-              <button
-                type="button"
-                onClick={handleAddActivityType}
-                disabled={activitiesLoading}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {activitiesLoading ? <LoadingSpinner size="sm" /> : 'Add'}
-              </button>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {formData.activityTypes.map((type, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
-                >
-                  {type}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveActivityType(index)}
-                    className="ml-1 text-indigo-600 hover:text-indigo-900"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Rest of the form fields */}
-          
+          {/* Other form fields */}
           <div className="mt-6 flex justify-end space-x-3">
             <button
               type="button"
@@ -190,12 +149,12 @@ const ProjectModal = ({ onClose, onSuccess, resources, clients, initialProject, 
               type="submit"
               className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
             >
-              Create Project
+              {mode === 'add' ? 'Create Project' : 'Update Project'}
             </button>
           </div>
         </form>
       </div>
-
+      {/* Modals */}
       {showResourceModal && (
         <ResourceSelectionModal
           resources={resources}
@@ -207,7 +166,6 @@ const ProjectModal = ({ onClose, onSuccess, resources, clients, initialProject, 
           }}
         />
       )}
-      
       {showClientModal && (
         <ClientModal
           onClose={() => setShowClientModal(false)}

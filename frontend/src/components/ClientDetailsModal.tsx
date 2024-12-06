@@ -7,38 +7,54 @@ import ConfirmationModal from './ConfirmationModal';
 interface ClientDetailsModalProps {
   client: Client;
   onClose: () => void;
-  onUpdateClient: (id: string, updates: Partial<Client>) => void;
+  onUpdateClient?: (id: string, updates: Partial<Client>) => void; // Prop opsiyonel hale getirildi
 }
 
-const ClientDetailsModal = ({ client, onClose, onUpdateClient }: ClientDetailsModalProps) => {
+const ClientDetailsModal = ({
+  client,
+  onClose,
+  onUpdateClient = () => {}, // Varsayılan boş bir işlev tanımlandı
+}: ClientDetailsModalProps) => {
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<ClientEmployee | null>(null);
   const [employeeToDelete, setEmployeeToDelete] = useState<ClientEmployee | null>(null);
 
   const handleAddEmployee = (employee: ClientEmployee) => {
     const currentEmployees = client.employees || [];
-    onUpdateClient(client.id, {
-      employees: [...currentEmployees, employee]
-    });
+    if (onUpdateClient) {
+      onUpdateClient(client.id, {
+        employees: [...currentEmployees, employee],
+      });
+    } else {
+      console.error('onUpdateClient is not defined');
+    }
   };
 
   const handleUpdateEmployee = (updatedEmployee: ClientEmployee) => {
     const currentEmployees = client.employees || [];
-    onUpdateClient(client.id, {
-      employees: currentEmployees.map(emp => 
-        emp.id === updatedEmployee.id ? updatedEmployee : emp
-      )
-    });
+    if (onUpdateClient) {
+      onUpdateClient(client.id, {
+        employees: currentEmployees.map(emp =>
+          emp.id === updatedEmployee.id ? updatedEmployee : emp
+        ),
+      });
+    } else {
+      console.error('onUpdateClient is not defined');
+    }
   };
 
   const handleDeleteEmployee = () => {
     if (!employeeToDelete) return;
-    
+
     const currentEmployees = client.employees || [];
-    onUpdateClient(client.id, {
-      employees: currentEmployees.filter(emp => emp.id !== employeeToDelete.id)
-    });
-    setEmployeeToDelete(null);
+    if (onUpdateClient) {
+      onUpdateClient(client.id, {
+        employees: currentEmployees.filter(emp => emp.id !== employeeToDelete.id),
+      });
+      setEmployeeToDelete(null);
+    } else {
+      console.error('onUpdateClient is not defined');
+    }
   };
 
   return (
@@ -81,7 +97,7 @@ const ClientDetailsModal = ({ client, onClose, onUpdateClient }: ClientDetailsMo
                 </p>
               </div>
             </div>
-            
+
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900">Çalışanlar</h3>
@@ -96,7 +112,7 @@ const ClientDetailsModal = ({ client, onClose, onUpdateClient }: ClientDetailsMo
                   <span>Çalışan Ekle</span>
                 </button>
               </div>
-              
+
               <div className="space-y-3">
                 {client.employees?.map(employee => (
                   <div

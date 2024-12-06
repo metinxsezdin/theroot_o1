@@ -1,4 +1,3 @@
-
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -31,9 +30,16 @@ router.post('/login', async (req, res) => {
     const user = await db.Personnel.findOne({ where: { email } });
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
+    // Şifrenin mevcut olduğundan emin olun
+    if (!user.password) {
+      return res.status(400).json({ message: 'User password is missing in the database' });
+    }
+
+    // Şifre karşılaştırması
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
+    // Token oluştur
     const token = jwt.sign({ id: user.id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
     res.json({ token });
   } catch (error) {
