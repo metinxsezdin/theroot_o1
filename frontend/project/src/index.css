@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Toast Styles */
+.Toastify__toast {
+  @apply rounded-lg shadow-lg;
+}
+
+.Toastify__toast-body {
+  @apply font-sans;
+}
+
+.Toastify__progress-bar {
+  @apply bg-indigo-500;
+}
+
+.Toastify__toast--success {
+  @apply bg-green-50 text-green-800;
+}
+
+.Toastify__toast--error {
+  @apply bg-red-50 text-red-800;
+}
+
+.Toastify__toast--warning {
+  @apply bg-yellow-50 text-yellow-800;
+}
+
+.Toastify__toast--info {
+  @apply bg-blue-50 text-blue-800;
+}
+
+.toggle-checkbox:checked {
+  @apply right-0 border-indigo-600;
+  right: 0;
+  border-color: #4f46e5;
+}
+
+.toggle-checkbox:checked + .toggle-label {
+  @apply bg-indigo-600;
+  background-color: #4f46e5;
+}
+
+.toggle-checkbox {
+  right: 0;
+  transition: all 0.3s;
+}
+
+.toggle-label {
+  transition: background-color 0.3s;
+}
+
+
+/* Chat styles */
+.rce-container-mbox {
+  @apply rounded-lg;
+}
+
+.rce-mbox {
+  @apply shadow-sm;
+}
+
+.rce-mbox-right {
+  background-color: #4F46E5 !important;
+}
+
+.rce-mbox-left {
+  background-color: #F3F4F6 !important;
+}
+
+.rce-mbox-right-title, 
+.rce-mbox-right-text {
+  color: white !important;
+}
+
+.rce-mbox-left-title {
+  color: #374151 !important;
+}
+
+.rce-mbox-left-text {
+  color: #4B5563 !important;
+}
+
+.rce-input {
+  @apply rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500;
+}
+
+.rce-button {
+  @apply rounded-lg;
+}
+
+/* Chat styles */
+.rce-container-mbox {
+  @apply rounded-lg;
+}
+
+.rce-mbox {
+  @apply shadow-sm;
+}
+
+.rce-input {
+  @apply rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500;
+}
+
+.rce-button {
+  @apply rounded-lg;
+}
