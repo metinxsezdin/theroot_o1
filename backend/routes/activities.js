@@ -1,26 +1,25 @@
-
 const express = require('express');
 const router = express.Router();
 const db = require('../models');
 
-// GET all bookings
+// GET all activities
 router.get('/', async (req, res) => {
   try {
-    const bookings = await db.Booking.findAll();
-    res.json(bookings);
+    const activities = await db.Activity.findAll();
+    res.json(activities);
   } catch (error) {
-    console.error('Error fetching bookings:', error);
+    console.error('Error fetching activities:', error);
     res.status(500).json({ message: 'An error occurred' });
   }
 });
 
-// POST create a booking
+// POST create an activity
 router.post('/', async (req, res) => {
   try {
-    const booking = await db.Booking.create(req.body);
-    res.status(201).json(booking);
+    const activity = await db.Activity.create(req.body);
+    res.status(201).json(activity);
   } catch (error) {
-    console.error('Error creating booking:', error);
+    console.error('Error creating activity:', error);
     res.status(500).json({ message: 'An error occurred' });
   }
 });
