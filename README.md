@@ -1,10 +1,6 @@
 
 # **TheRoot O1**
 
-**TheRoot O1** is a full-stack project management application designed to simplify the management of personnel, projects, clients, and resources. The application includes a robust backend built with Node.js and Express.js, along with a modern, responsive frontend powered by React and TypeScript.
-
----
-
 ## **Features**
 
 ### Backend
