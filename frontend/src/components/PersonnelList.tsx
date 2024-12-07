@@ -14,8 +14,8 @@ const PersonnelList = ({ onPersonClick, onFocusPerson, focusedPerson }) => {
     const fetchData = async () => {
       try {
         const [personnelResponse, departmentsResponse] = await Promise.all([
-          axios.get('http://localhost:5005/personnel'), // Backend API endpoint
-          axios.get('http://localhost:5005/departments'), // Backend API endpoint
+          axios.get('http://localhost:5000/personnel'), // Backend API endpoint
+          axios.get('http://localhost:5000/departments'), // Backend API endpoint
         ]);
         setPersonnel(personnelResponse.data);
         setDepartments(departmentsResponse.data);
