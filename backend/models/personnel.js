@@ -16,6 +16,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      validate: {
+        isEmail: true, // E-posta doğrulama
+      },
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false, // Şifre zorunlu
+      validate: {
+        len: [6, 255], // Şifre uzunluğu en az 6 karakter olmalı
+      },
     },
     availability: {
       type: DataTypes.STRING, // veya BOOLEAN olarak ayarlayabilirsiniz

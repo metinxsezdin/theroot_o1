@@ -10,30 +10,54 @@ const AuthPage = () => {
   });
   const [error, setError] = useState('');
 
+  // Formdaki değişiklikleri loglar ve state'i günceller
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const updatedFormData = { ...formData, [e.target.name]: e.target.value };
+    console.log('Updated Form Data:', updatedFormData); // Log ekleme
+    setFormData(updatedFormData);
   };
 
+  // Form gönderildiğinde işlemleri loglar ve API çağrısı yapar
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Eksik alan kontrolü
+    if (!formData.email || !formData.password) {
+      setError('Email and password are required.');
+      console.error('Validation Error: Missing email or password'); // Log ekleme
+      return;
+    }
+    if (!isLogin && !formData.name) {
+      setError('Full Name is required for registration.');
+      console.error('Validation Error: Missing full name for registration'); // Log ekleme
+      return;
+    }
+
     try {
+      let response;
+      console.log('Submitting Form Data:', formData); // Log ekleme
       if (isLogin) {
-        const response = await login(formData.email, formData.password);
-        localStorage.setItem('token', response.token); // Save token
-        alert('Login Successful!');
+        response = await login(formData.email, formData.password);
+        console.log('Login Successful:', response); // Log ekleme
       } else {
-        const response = await register(formData.name, formData.email, formData.password);
-        localStorage.setItem('token', response.token); // Save token
-        alert('Registration Successful!');
+        response = await register(formData.name, formData.email, formData.password);
+        console.log('Registration Successful:', response); // Log ekleme
       }
+
+      localStorage.setItem('token', response.token); // Token'ı sakla
+      alert(isLogin ? 'Login Successful!' : 'Registration Successful!');
+      setError('');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'An error occurred');
+      console.error('API Error:', err.response?.data || err.message); // Log ekleme
+      setError(err.response?.data?.message || 'An error occurred.');
     }
   };
 
+  // Giriş ve kayıt modları arasında geçiş yapar
   const toggleMode = () => {
     setError('');
     setFormData({ name: '', email: '', password: '' });
+    console.log('Mode Switched:', isLogin ? 'Register' : 'Login'); // Log ekleme
     setIsLogin(!isLogin);
   };
 
@@ -47,7 +71,9 @@ const AuthPage = () => {
         <form className="space-y-4" onSubmit={handleSubmit}>
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Full Name
+              </label>
               <input
                 type="text"
                 name="name"
@@ -59,7 +85,9 @@ const AuthPage = () => {
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <input
               type="email"
               name="email"
@@ -71,7 +99,9 @@ const AuthPage = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <input
               type="password"
               name="password"

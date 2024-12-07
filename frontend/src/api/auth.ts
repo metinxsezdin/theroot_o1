@@ -1,33 +1,40 @@
 import axios from 'axios';
-import { handleApiError } from '../utils/errorHandling';
 
+// API instance
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 });
 
-// Add response interceptor for error handling
+// Hata işleme interceptörü
 api.interceptors.response.use(
   response => response,
-  error => handleApiError(error)
+  error => {
+    console.error('API error:', error);
+    return Promise.reject(error);
+  }
 );
 
+// Login fonksiyonu
 export const login = async (email: string, password: string) => {
-  const response = await api.post('/auth/login', { email, password });
-  const { token } = response.data;
-  localStorage.setItem('token', token);
-  return response.data;
+  try {
+    const response = await api.post('/auth/login', { email, password });
+    return response.data; // Gerekirse token döndürebiliriz
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error; // Hata üst seviyeye gönderilir
+  }
 };
 
-export const register = async (name: string, email: string, password: string) => {
-  const response = await api.post('/auth/register', { name, email, password });
-  const { token } = response.data;
-  localStorage.setItem('token', token);
-  return response.data;
-};
-
-export const logout = () => {
-  localStorage.removeItem('token');
+// Register fonksiyonu
+export const register = async (data: { name: string; email: string; password: string }) => {
+  try {
+    const response = await api.post('/auth/register', data);
+    return response.data;
+  } catch (error) {
+    console.error('Register error:', error);
+    throw error;
+  }
 };
