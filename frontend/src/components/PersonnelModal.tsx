@@ -13,10 +13,17 @@ interface PersonnelModalProps {
   mode?: 'add' | 'edit';
 }
 
-const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode = 'add' }: PersonnelModalProps) => {
+const PersonnelModal = ({
+  departments,
+  onClose,
+  onSuccess,
+  initialPerson,
+  mode = 'add',
+}: PersonnelModalProps) => {
   const [formData, setFormData] = useState({
     name: initialPerson?.name || '',
     role: initialPerson?.role || '',
+    email: initialPerson?.email || '',
     profileImage: initialPerson?.profileImage,
     departmentId: initialPerson?.departmentId || departments[0]?.id || '',
     availability: {
@@ -24,18 +31,22 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
       end: initialPerson?.availability.end || '17:00',
     },
   });
-  
-  const [previewUrl, setPreviewUrl] = useState<string | undefined>(initialPerson?.profileImage?.url);
+
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>(
+    initialPerson?.profileImage?.url
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { execute: savePersonnel, loading } = useApi(
     mode === 'add' ? personnelApi.create : personnelApi.update,
     {
-      successMessage: `Personnel ${mode === 'add' ? 'created' : 'updated'} successfully`,
+      successMessage: `Personnel ${
+        mode === 'add' ? 'created' : 'updated'
+      } successfully`,
       onSuccess: () => {
         onSuccess?.();
         onClose();
-      }
+      },
     }
   );
 
@@ -46,12 +57,12 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
       reader.onloadend = () => {
         const url = reader.result as string;
         setPreviewUrl(url);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           profileImage: {
             url,
-            name: file.name
-          }
+            name: file.name,
+          },
         }));
       };
       reader.readAsDataURL(file);
@@ -60,9 +71,9 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
 
   const handleRemoveImage = () => {
     setPreviewUrl(undefined);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      profileImage: undefined
+      profileImage: undefined,
     }));
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -72,13 +83,18 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...formData,
+        availability: JSON.stringify(formData.availability), // availability'yi JSON string olarak gönder
+      };
+
       if (mode === 'add') {
-        await savePersonnel(formData);
+        await savePersonnel(payload);
       } else if (initialPerson) {
-        await savePersonnel(initialPerson.id, formData);
+        await savePersonnel(initialPerson.id, payload);
       }
     } catch (error) {
-      // Error handling is managed by useApi hook
+      console.error('Error saving personnel:', error);
     }
   };
 
@@ -95,6 +111,7 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
         </div>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
+            {/* Profile Image */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Profile Image
@@ -144,6 +161,8 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
                 </div>
               </div>
             </div>
+
+            {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Name
@@ -158,6 +177,24 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
                 required
               />
             </div>
+
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, email: e.target.value }))
+                }
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                required
+              />
+            </div>
+
+            {/* Role */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Role
@@ -172,6 +209,8 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
                 required
               />
             </div>
+
+            {/* Department */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Department
@@ -190,6 +229,8 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
                 ))}
               </select>
             </div>
+
+            {/* Availability */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -201,7 +242,10 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      availability: { ...prev.availability, start: e.target.value },
+                      availability: {
+                        ...prev.availability,
+                        start: e.target.value,
+                      },
                     }))
                   }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -218,7 +262,10 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,
-                      availability: { ...prev.availability, end: e.target.value },
+                      availability: {
+                        ...prev.availability,
+                        end: e.target.value,
+                      },
                     }))
                   }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
@@ -227,6 +274,7 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
               </div>
             </div>
           </div>
+
           <div className="mt-6 flex justify-end space-x-3">
             <button
               type="button"
@@ -243,8 +291,10 @@ const PersonnelModal = ({ departments, onClose, onSuccess, initialPerson, mode =
             >
               {loading ? (
                 <LoadingSpinner size="sm" className="mx-6" />
+              ) : mode === 'add' ? (
+                'Add Personnel'
               ) : (
-                mode === 'add' ? 'Add Personnel' : 'Save Changes'
+                'Save Changes'
               )}
             </button>
           </div>

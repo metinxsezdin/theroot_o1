@@ -28,11 +28,12 @@ const PersonnelPage = ({
   const [showDepartmentDetails, setShowDepartmentDetails] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredPersonnel = personnel.filter(person => {
+  // Kontrol ile güncellenmiş filtreleme
+  const filteredPersonnel = (personnel || []).filter(person => {
     const searchLower = searchQuery.toLowerCase();
     const name = person.name?.toLowerCase() || '';
     const role = person.role?.toLowerCase() || '';
-    
+
     return name.includes(searchLower) || role.includes(searchLower);
   });
 
@@ -50,6 +51,14 @@ const PersonnelPage = ({
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
           {error}
         </div>
+      </div>
+    );
+  }
+
+  if (!personnel || personnel.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <p>No personnel available</p>
       </div>
     );
   }

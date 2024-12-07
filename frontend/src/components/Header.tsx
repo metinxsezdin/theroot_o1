@@ -4,10 +4,9 @@ import KeyboardShortcutsInfo from './KeyboardShortcutsInfo';
 import { ColorFilterType, Resource } from '../types';
 
 interface HeaderProps {
-  onPreviousWeek: () => void;
-  onNextWeek: () => void;
-  onAddBooking: () => void;
   currentDate: Date;
+  onDateChange: (newDate: Date) => void; // Tarih güncelleme işlevi
+  onAddBooking: () => void; // Rezervasyon ekleme işlevi
   view: 'week' | 'day';
   onViewChange: (view: 'week' | 'day') => void;
   colorFilter: ColorFilterType;
@@ -16,58 +15,64 @@ interface HeaderProps {
   onClearFocus: () => void;
 }
 
-const Header = ({ 
-  onPreviousWeek, 
-  onNextWeek, 
-  onAddBooking, 
+const Header = ({
   currentDate,
+  onDateChange,
+  onAddBooking,
   view,
   onViewChange,
   colorFilter,
   onColorFilterChange,
   focusedResource,
-  onClearFocus
+  onClearFocus,
 }: HeaderProps) => {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
 
-  const startOfWeek = new Date(currentDate);
-  const endOfWeek = new Date(currentDate);
-  endOfWeek.setDate(endOfWeek.getDate() + 6);
+  const handlePreviousWeek = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 7); // Bir önceki hafta
+    onDateChange(newDate);
+  };
+
+  const handleNextWeek = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + 7); // Bir sonraki hafta
+    onDateChange(newDate);
+  };
 
   const formatDateRange = () => {
     const options: Intl.DateTimeFormatOptions = {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     };
 
     if (view === 'day') {
       return currentDate.toLocaleDateString('tr-TR', options);
     }
 
+    const startOfWeek = new Date(currentDate);
+    const endOfWeek = new Date(currentDate);
+    startOfWeek.setDate(startOfWeek.getDate() - (currentDate.getDay() || 7) + 1);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
     if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
       return `${startOfWeek.getDate()} - ${endOfWeek.getDate()} ${startOfWeek.toLocaleDateString('tr-TR', {
         month: 'long',
-        year: 'numeric'
-      })}`;
-    } else if (startOfWeek.getFullYear() === endOfWeek.getFullYear()) {
-      return `${startOfWeek.toLocaleDateString('tr-TR', { month: 'short' })} ${startOfWeek.getDate()} - ${endOfWeek.toLocaleDateString('tr-TR', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      })}`;
-    } else {
-      return `${startOfWeek.toLocaleDateString('tr-TR', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      })} - ${endOfWeek.toLocaleDateString('tr-TR', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
+        year: 'numeric',
       })}`;
     }
+
+    return `${startOfWeek.toLocaleDateString('tr-TR', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })} - ${endOfWeek.toLocaleDateString('tr-TR', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })}`;
   };
 
   return (
@@ -75,14 +80,16 @@ const Header = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
-            onClick={onPreviousWeek}
+            onClick={handlePreviousWeek}
             className="p-2 hover:bg-gray-100 rounded-full"
+            aria-label="Önceki hafta"
           >
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
           <button
-            onClick={onNextWeek}
+            onClick={handleNextWeek}
             className="p-2 hover:bg-gray-100 rounded-full"
+            aria-label="Sonraki hafta"
           >
             <ChevronRight className="w-5 h-5 text-gray-600" />
           </button>
@@ -92,10 +99,7 @@ const Header = ({
           {focusedResource && (
             <div className="ml-4 flex items-center space-x-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full">
               <span className="text-sm font-medium">{focusedResource.name}</span>
-              <button
-                onClick={onClearFocus}
-                className="hover:text-indigo-900"
-              >
+              <button onClick={onClearFocus} className="hover:text-indigo-900">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -122,58 +126,13 @@ const Header = ({
               Günlük
             </button>
           </div>
-          <div className="relative inline-block">
-            <button
-              onClick={() => setShowFilterMenu(!showFilterMenu)}
-              className="flex items-center space-x-2 px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
-            >
-              <Filter className="w-4 h-4" />
-              <span>Renk Filtresi</span>
-            </button>
-            {showFilterMenu && (
-              <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                <div className="py-1" role="menu">
-                  <button
-                    onClick={() => {
-                      onColorFilterChange('none');
-                      setShowFilterMenu(false);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm ${
-                      colorFilter === 'none' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                    } hover:bg-gray-100`}
-                  >
-                    Varsayılan
-                  </button>
-                  <button
-                    onClick={() => {
-                      onColorFilterChange('client');
-                      setShowFilterMenu(false);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm ${
-                      colorFilter === 'client' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                    } hover:bg-gray-100`}
-                  >
-                    Müşteriye Göre
-                  </button>
-                  <button
-                    onClick={() => {
-                      onColorFilterChange('project');
-                      setShowFilterMenu(false);
-                    }}
-                    className={`block w-full text-left px-4 py-2 text-sm ${
-                      colorFilter === 'project' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                    } hover:bg-gray-100`}
-                  >
-                    Projeye Göre
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
         <div className="flex items-center space-x-2">
           <button
-            onClick={onAddBooking}
+            onClick={() => {
+              console.log('Rezervasyon Ekle butonu tetiklendi');
+              onAddBooking();
+            }}
             className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
             title="Rezervasyon Ekle (R)"
           >
