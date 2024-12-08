@@ -3,7 +3,7 @@ import { getDatabase } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBkkFF0XhNZeWuDmOfEhsgdfX1VBG7WTas",
+  apiKey: "",
   authDomain: "theroots-chat.firebaseapp.com",
   projectId: "theroots-chat",
   storageBucket: "theroots-chat.appspot.com",
